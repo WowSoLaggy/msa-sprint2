@@ -31,7 +31,7 @@ jobs:
   
     - name: Generate diagrams
       run: |
-        java -jar ./misc/plantuml.jar -verbose **/*.puml
+        java -jar ./tools/plantuml.jar -verbose **/*.puml
 
     - name: Commit diagrams
       if: success()
