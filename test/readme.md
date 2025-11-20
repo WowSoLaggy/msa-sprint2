@@ -56,7 +56,7 @@ docker run --rm \
   -e DB_NAME=hotelio \
   -e DB_USER=hotelio \
   -e DB_PASSWORD=hotelio \
-  -e API_URL=http://monolith:8084 \
+  -e API_URL=http://monolith:8080 \
   hotelio-tester
 ```
 

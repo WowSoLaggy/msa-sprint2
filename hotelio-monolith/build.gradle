@@ -24,7 +24,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
 
 
-    implementation files('libs/p-o-y-1.0.0.jar')
+    //implementation files('libs/p-o-y-1.0.0.jar')
 }
 
 
