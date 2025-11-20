@@ -1,0 +1,30 @@
+@startuml context_02.puml
+title Intermediate State - Context Diagram
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+
+' Systems
+
+System_Boundary(hotelio_boundary, "Hotelio System") {
+  Container_Boundary(hotelio_monolith, "Hotelio Monolith") {
+    Component(user_service, "User Service", "java", "Manages users")
+    Component(hotel_service, "Hotel Service", "java", "Manages hotel details")
+    Component(review_service, "Review Service", "java", "Manages hotel reviews")
+    Component(promocode_service, "Promocode Service", "java", "Manages promo codes")
+  }
+
+  Container(broker, "Message Broker", "Kafka")
+
+  Container_Boundary(booking_service, "Booking Service") {
+    Component(booking_ctl, "Booking Controller", "java")
+    Component(booking_db, "Booking DB", "Postgres")
+    Rel(booking_ctl, booking_db, "Reads / writes data")
+  }
+
+  Rel(hotelio_monolith, booking_ctl, "Communicates with", "gRPC")
+
+  Rel(booking_ctl, broker, "Sends events to")
+}
+
+@enduml

@@ -1,0 +1,34 @@
+@startuml container_target.puml
+title Hotelio - Container Diagram
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+
+' Actors
+
+Person(user, "User", "Uses Hotelio")
+Person(admin, "Admin", "Administration")
+
+' Systems
+
+System_Boundary(hotelio_boundary, "Hotelio System") {
+  Container(web_app, "Web Application", "node.js")
+  Container(api_gateway, "API Gateway", "Kong")
+
+  System_Boundary(service_mesh, "Service Mesh") {
+    Container(user_service, "User Service", "java", "Manages users")
+    Container(hotel_service, "Hotel Service", "java", "Manages hotel details")
+    Container(review_service, "Review Service", "java", "Manages hotel reviews")
+    Container(booking_service, "Booking Service", "java", "Manages hotel bookings")
+    Container(promo_code_service, "PromoCode Service", "java", "Manages promo codes")
+    Container(observability_service, "Observability Service", "java", "Collects metrics")
+  }
+
+  Rel(user, web_app, "Uses")
+  Rel(admin, web_app, "Uses")
+  Rel(web_app, api_gateway, "Connects to")
+  Rel(api_gateway, service_mesh, "Redirects to")
+}
+
+
+@enduml

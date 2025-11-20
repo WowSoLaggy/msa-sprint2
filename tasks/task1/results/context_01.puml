@@ -1,0 +1,20 @@
+@startuml context_01.puml
+title Initial State - Context Diagram
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+
+' Systems
+
+System_Boundary(hotelio_boundary, "Hotelio System") {
+  Container_Boundary(hotelio_monolith, "Hotelio Monolith") {
+    Component(user_service, "User Service", "java", "Manages users")
+    Component(hotel_service, "Hotel Service", "java", "Manages hotel details")
+    Component(review_service, "Review Service", "java", "Manages hotel reviews")
+    Component(booking_service, "Booking Service", "java", "Manages hotel bookings")
+    Component(promocode_service, "Promocode Service", "java", "Manages promo codes")
+    Component(db, "Monolith DB", "Postgres")
+  }
+}
+
+@enduml
