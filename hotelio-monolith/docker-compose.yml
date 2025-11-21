@@ -52,8 +52,45 @@ services:
     networks:
       - hotelio-net
 
+  booking-service:
+    build:
+      context: ../hotelio/booking_service
+      dockerfile: Dockerfile
+    container_name: booking-service
+    environment:
+      PORT: 9090
+      HTTP_PORT: 9091
+      MONOLITH_HOST: monolith
+      MONOLITH_PORT: 8080
+      BOOKING_DB_HOST: booking-db
+      BOOKING_DB_PORT: 5432
+      BOOKING_DB_USER: booking
+      BOOKING_DB_PASSWORD: booking
+      BOOKING_DB_NAME: booking
+    networks:
+      - hotelio-net
+    ports:
+      - "9090:9090"
+      - "9091:9091"
+      - "50051:50051"
+    depends_on:
+      - booking-db
+
+  booking-db:
+    image: postgres:15
+    container_name: booking-db
+    environment:
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+      POSTGRES_DB: booking
+    volumes:
+      - booking-db-data:/var/lib/postgresql/data
+    networks:
+      - hotelio-net
+
 volumes:
   monolith-db-data:
+  booking-db-data:
 
 networks:
   hotelio-net:

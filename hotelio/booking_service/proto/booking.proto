@@ -1,0 +1,40 @@
+syntax = "proto3";
+package booking;
+
+service BookingService {
+  rpc CreateBooking (CreateBookingRequest) returns (CreateBookingResponse);
+  rpc ListBookings (ListBookingsRequest) returns (ListBookingsResponse);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message Booking {
+  string id = 1;
+  string user_id = 2;
+  string hotel_id = 3;
+  string promo_code = 4;
+  int32 discount_percent = 5;
+  double price = 6;
+}
+
+message CreateBookingRequest {
+  string user_id = 1;
+  string hotel_id = 2;
+  string promo_code = 3;
+}
+
+message CreateBookingResponse {
+  Booking booking = 1;
+}
+
+message ListBookingsRequest {
+  string user_id = 1;
+}
+
+message ListBookingsResponse {
+  repeated Booking bookings = 1;
+}
+
+message HealthRequest {}
+message HealthResponse {
+  string status = 1;
+}
