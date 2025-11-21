@@ -8,23 +8,34 @@ title Intermediate State - Context Diagram
 
 System_Boundary(hotelio_boundary, "Hotelio System") {
   Container_Boundary(hotelio_monolith, "Hotelio Monolith") {
+    Component(user_ctl, "User Controller", "Spring MVC", "/api/users")
+    Component(hotel_ctl, "Hotel Controller", "Spring MVC", "/api/hotels")
+    Component(review_ctl, "Review Controller", "Spring MVC", "/api/reviews")
+    Component(promocode_ctl, "Promocode Controller", "Spring MVC", "/api/promos")
+
     Component(user_service, "User Service", "java", "Manages users")
     Component(hotel_service, "Hotel Service", "java", "Manages hotel details")
     Component(review_service, "Review Service", "java", "Manages hotel reviews")
     Component(promocode_service, "Promocode Service", "java", "Manages promo codes")
+
+    Rel_D(user_ctl, user_service, "Uses")
+    Rel_D(hotel_ctl, hotel_service, "Uses")
+    Rel_D(review_ctl, review_service, "Uses")
+    Rel_D(promocode_ctl, promocode_service, "Uses")
   }
 
   Container(broker, "Message Broker", "Kafka")
 
-  Container_Boundary(booking_service, "Booking Service") {
-    Component(booking_ctl, "Booking Controller", "java")
+  Container_Boundary(booking_service_boundary, "Booking Service Boundary") {
+    Component(booking_service, "Booking Service", "java")
     Component(booking_db, "Booking DB", "Postgres")
-    Rel(booking_ctl, booking_db, "Reads / writes data")
+
+    Rel_D(booking_service, booking_db, "Reads / writes data")
   }
 
-  Rel(hotelio_monolith, booking_ctl, "Communicates with", "gRPC")
+  Rel(hotelio_monolith, booking_service, "Communicates with", "gRPC")
 
-  Rel(booking_ctl, broker, "Sends events to")
+  Rel(booking_service, broker, "Sends events to")
 }
 
 @enduml

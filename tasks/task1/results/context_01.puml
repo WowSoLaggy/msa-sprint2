@@ -8,12 +8,31 @@ title Initial State - Context Diagram
 
 System_Boundary(hotelio_boundary, "Hotelio System") {
   Container_Boundary(hotelio_monolith, "Hotelio Monolith") {
+    Component(user_ctl, "User Controller", "Spring MVC", "/api/users")
+    Component(hotel_ctl, "Hotel Controller", "Spring MVC", "/api/hotels")
+    Component(review_ctl, "Review Controller", "Spring MVC", "/api/reviews")
+    Component(booking_ctl, "Booking Controller", "Spring MVC", "/api/bookings")
+    Component(promocode_ctl, "Promocode Controller", "Spring MVC", "/api/promos")
+    
     Component(user_service, "User Service", "java", "Manages users")
     Component(hotel_service, "Hotel Service", "java", "Manages hotel details")
     Component(review_service, "Review Service", "java", "Manages hotel reviews")
     Component(booking_service, "Booking Service", "java", "Manages hotel bookings")
     Component(promocode_service, "Promocode Service", "java", "Manages promo codes")
+
     Component(db, "Monolith DB", "Postgres")
+
+    Rel_D(user_ctl, user_service, "Uses")
+    Rel_D(hotel_ctl, hotel_service, "Uses")
+    Rel_D(review_ctl, review_service, "Uses")
+    Rel_D(booking_ctl, booking_service, "Uses")
+    Rel_D(promocode_ctl, promocode_service, "Uses")
+
+    Rel_D(user_service, db, "Uses")
+    Rel_D(hotel_service, db, "Uses")
+    Rel_D(review_service, db, "Uses")
+    Rel_D(booking_service, db, "Uses")
+    Rel_D(promocode_service, db, "Uses")
   }
 }
 

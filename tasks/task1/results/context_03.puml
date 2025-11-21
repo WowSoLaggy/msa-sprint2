@@ -10,37 +10,37 @@ System_Boundary(hotelio_boundary, "Hotelio System") {
 
   Container(broker, "Message Broker", "Kafka")
 
-  Container_Boundary(booking_service, "Booking Service") {
-    Component(booking_ctl, "Booking Controller", "java")
+  Container_Boundary(booking_service_boundary, "Booking Service Boundary") {
+    Component(booking_service, "Booking Service", "java")
     Component(booking_db, "Booking DB", "Postgres")
-    Rel(booking_ctl, booking_db, "Reads / writes data")
+    Rel(booking_service, booking_db, "Reads / writes data")
   }
-  Container_Boundary(user_service, "User Service") {
-    Component(user_ctl, "User Controller", "java")
+  Container_Boundary(user_service_boundary, "User Service Boundary") {
+    Component(user_service, "User Service", "java")
     Component(user_db, "User DB", "Postgres")
-    Rel(user_ctl, user_db, "Reads / writes data")
+    Rel(user_service, user_db, "Reads / writes data")
   }
-  Container_Boundary(hotel_service, "Hotel Service") {
-    Component(hotel_ctl, "Hotel Controller", "java")
+  Container_Boundary(hotel_service_boundary, "Hotel Service Boundary") {
+    Component(hotel_service, "Hotel Service", "java")
     Component(hotel_db, "Hotel DB", "Postgres")
-    Rel(hotel_ctl, hotel_db, "Reads / writes data")
+    Rel(hotel_service, hotel_db, "Reads / writes data")
   }
-  Container_Boundary(review_service, "Review Service") {
-    Component(review_ctl, "Review Controller", "java")
+  Container_Boundary(review_service_boundary, "Review Service Boundary") {
+    Component(review_service, "Review Service", "java")
     Component(review_db, "Review DB", "Postgres")
-    Rel(review_ctl, review_db, "Reads / writes data")
+    Rel(review_service, review_db, "Reads / writes data")
   }
-  Container_Boundary(promocode_service, "Promocode Service") {
-    Component(promocode_ctl, "Promocode Controller", "java")
+  Container_Boundary(promocode_service_boundary, "Promocode Service Boundary") {
+    Component(promocode_service, "Promocode Service", "java")
     Component(promocode_db, "Promocode DB", "Postgres")
-    Rel(promocode_ctl, promocode_db, "Reads / writes data")
+    Rel(promocode_service, promocode_db, "Reads / writes data")
   }
 
-  Rel_U(booking_ctl, broker, "Communicates with")
-  Rel_U(user_ctl, broker, "Communicates with")
-  Rel_U(hotel_ctl, broker, "Communicates with")
-  Rel_U(review_ctl, broker, "Communicates with")
-  Rel_U(promocode_ctl, broker, "Communicates with")
+  Rel_U(booking_service, broker, "Communicates with")
+  Rel_U(user_service, broker, "Communicates with")
+  Rel_U(hotel_service, broker, "Communicates with")
+  Rel_U(review_service, broker, "Communicates with")
+  Rel_U(promocode_service, broker, "Communicates with")
 }
 
 @enduml
