@@ -8,10 +8,26 @@ function log(...args) {
 export async function listBookings(userId) {
   if (userId) {
     const { rows } = await pool.query('SELECT * FROM bookings WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
-    return rows;
+    return rows.map(r => ({
+      id: r.id,
+      user_id: r.user_id,
+      hotel_id: r.hotel_id,
+      promo_code: r.promo_code || '',
+      discount_percent: Number(r.discount_percent || 0),
+      price: Number(r.price || 0),
+      created_at: r.created_at || new Date(r.created_at_fallback || Date.now()).toISOString()
+    }));
   }
   const { rows } = await pool.query('SELECT * FROM bookings ORDER BY created_at DESC');
-  return rows;
+  return rows.map(r => ({
+    id: r.id,
+    user_id: r.user_id,
+    hotel_id: r.hotel_id,
+    promo_code: r.promo_code || '',
+    discount_percent: Number(r.discount_percent || 0),
+    price: Number(r.price || 0),
+    created_at: r.created_at || new Date(r.created_at_fallback || Date.now()).toISOString()
+  }));
 }
 
 export async function createBooking({ userId, hotelId, promoCode }) {
@@ -23,15 +39,25 @@ export async function createBooking({ userId, hotelId, promoCode }) {
   const basePrice = await resolveBasePrice(userId);
   const discount = await resolvePromoDiscount(promoCode, userId);
   const finalPrice = basePrice - discount;
+  const createdAt = new Date().toISOString();
 
   log('Price computed', { basePrice, discount, finalPrice });
 
   const insert = await pool.query(
-    `INSERT INTO bookings (user_id, hotel_id, promo_code, discount_percent, price)
-     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [userId, hotelId, promoCode || null, discount, finalPrice]
+    `INSERT INTO bookings (user_id, hotel_id, promo_code, discount_percent, price, created_at)
+     VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+    [userId, hotelId, promoCode || null, discount, finalPrice, createdAt]
   );
-  return insert.rows[0];
+  const inserted = insert.rows[0];
+  return {
+    id: inserted.id,
+    user_id: inserted.user_id,
+    hotel_id: inserted.hotel_id,
+    promo_code: inserted.promo_code || promoCode || '',
+    discount_percent: Number(inserted.discount_percent ?? discount ?? 0),
+    price: Number(inserted.price ?? finalPrice ?? 0),
+    created_at: inserted.created_at || createdAt
+  };
 }
 
 async function validateUser(userId) {

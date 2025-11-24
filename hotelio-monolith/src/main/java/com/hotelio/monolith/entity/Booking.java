@@ -22,6 +22,8 @@ public class Booking {
 
     private Instant createdAt;
 
+    public Booking() {}
+
     public Long getId() {
         return id;
     }
