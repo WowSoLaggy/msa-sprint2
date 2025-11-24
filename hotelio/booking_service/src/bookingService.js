@@ -1,37 +1,47 @@
 import { pool } from './db.js';
 import { getUserProfile, getHotelState, getHotelTrust, validatePromo } from './externalClients.js';
 
-function log(...args) {
-  console.log('[booking-service]', ...args);
-}
 
 export async function listBookings(userId) {
+  let query;
+  let params = [];
+
   if (userId) {
-    const { rows } = await pool.query('SELECT * FROM bookings WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
-    return rows.map(r => ({
-      id: r.id,
-      user_id: r.user_id,
-      hotel_id: r.hotel_id,
-      promo_code: r.promo_code || '',
-      discount_percent: Number(r.discount_percent || 0),
-      price: Number(r.price || 0),
-      created_at: r.created_at || new Date(r.created_at_fallback || Date.now()).toISOString()
-    }));
+    query = `
+      SELECT * FROM bookings
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+    `;
+    params = [userId];
+  } else {
+    query = `
+      SELECT * FROM bookings
+      ORDER BY created_at DESC
+    `;
   }
-  const { rows } = await pool.query('SELECT * FROM bookings ORDER BY created_at DESC');
-  return rows.map(r => ({
+  console.log(`Listing bookings with query:`);
+  console.log(`${query}`);
+  console.log(`and params: \'${params}\'`);
+
+  const { rows } = await pool.query(query, params);
+  console.log(`Found ${rows.length} bookings for user_id: \'${userId}\'`);
+
+  const retVal = rows.map(r => ({
     id: r.id,
     user_id: r.user_id,
     hotel_id: r.hotel_id,
     promo_code: r.promo_code || '',
     discount_percent: Number(r.discount_percent || 0),
     price: Number(r.price || 0),
-    created_at: r.created_at || new Date(r.created_at_fallback || Date.now()).toISOString()
+    created_at: new Date(r.created_at).toISOString()
   }));
+  console.log('Returning bookings:', retVal);
+
+  return retVal;
 }
 
 export async function createBooking({ userId, hotelId, promoCode }) {
-  log('Creating booking', { userId, hotelId, promoCode });
+  console.log('Creating booking', { userId, hotelId, promoCode });
 
   await validateUser(userId);
   await validateHotel(hotelId);
@@ -41,7 +51,7 @@ export async function createBooking({ userId, hotelId, promoCode }) {
   const finalPrice = basePrice - discount;
   const createdAt = new Date().toISOString();
 
-  log('Price computed', { basePrice, discount, finalPrice });
+  console.log('Price computed', { basePrice, discount, finalPrice });
 
   const insert = await pool.query(
     `INSERT INTO bookings (user_id, hotel_id, promo_code, discount_percent, price, created_at)
@@ -80,7 +90,7 @@ async function resolveBasePrice(userId) {
   const status = profile?.status;
   const isVip = status && status.toUpperCase() === 'VIP';
   const price = isVip ? 80.0 : 100.0;
-  log('Base price', { userId, status, price });
+  console.log('Base price', { userId, status, price });
   return price;
 }
 
@@ -88,9 +98,9 @@ async function resolvePromoDiscount(promoCode, userId) {
   if (!promoCode) return 0.0;
   const promo = await validatePromo(promoCode, userId);
   if (!promo) {
-    log('Promo invalid', { promoCode, userId });
+    console.log('Promo invalid', { promoCode, userId });
     return 0.0;
   }
-  log('Promo applied', { promoCode, discount: promo.discount });
+  console.log('Promo applied', { promoCode, discount: promo.discount });
   return +promo.discount || 0.0;
 }
