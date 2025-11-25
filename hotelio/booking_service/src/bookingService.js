@@ -1,5 +1,5 @@
 import { pool } from './db.js';
-import { getUserProfile, getHotelState, getHotelTrust, validatePromo } from './externalClients.js';
+import { getUserActive, getUserBlacklisted, getUserVip, getHotelOperational, getHotelTrusted, getHotelFullyBooked, validatePromo } from './externalClients.js';
 
 
 export async function listBookings(userId) {
@@ -59,38 +59,52 @@ export async function createBooking({ userId, hotelId, promoCode }) {
     [userId, hotelId, promoCode || null, discount, finalPrice, createdAt]
   );
   const inserted = insert.rows[0];
-  return {
+
+  const retVal = {
     id: inserted.id,
     user_id: inserted.user_id,
     hotel_id: inserted.hotel_id,
     promo_code: inserted.promo_code || promoCode || '',
     discount_percent: Number(inserted.discount_percent ?? discount ?? 0),
     price: Number(inserted.price ?? finalPrice ?? 0),
-    created_at: inserted.created_at || createdAt
+    created_at: new Date(inserted.created_at).toISOString()
   };
+  console.log('Created booking', retVal);
+
+  return retVal;
 }
 
 async function validateUser(userId) {
-  const profile = await getUserProfile(userId);
-  if (!profile) throw new Error('User not found');
-  if (!profile.active) throw new Error('User is inactive');
-  if (profile.blacklisted) throw new Error('User is blacklisted');
+  console.log(`Validating user: \'${userId}'`)
+
+  const active = await getUserActive(userId);
+  if (!active) throw new Error('User is inactive');
+
+  const blacklisted = await getUserBlacklisted(userId);
+  if (blacklisted) throw new Error('User is blacklisted');
+
+  console.log('User validated OK')
 }
 
 async function validateHotel(hotelId) {
-  const state = await getHotelState(hotelId);
-  if (!state || !state.operational) throw new Error('Hotel is not operational');
-  const trust = await getHotelTrust(hotelId);
-  if (!trust || !trust.trusted) throw new Error('Hotel is not trusted based on reviews');
-  if (state.fullyBooked) throw new Error('Hotel is fully booked');
+  console.log(`Validating hotel: \'${hotelId}'`)
+
+  const operational = await getHotelOperational(hotelId);
+  if (!operational) throw new Error('Hotel is not operational');
+
+  const trusted = await getHotelTrusted(hotelId);
+  if (!trusted) throw new Error('Hotel is not trusted based on reviews');
+
+  const fullyBooked = await getHotelFullyBooked(hotelId);
+  if (fullyBooked) throw new Error('Hotel is fully booked');
+
+  console.log('Hotel validated OK')
 }
 
 async function resolveBasePrice(userId) {
-  const profile = await getUserProfile(userId);
-  const status = profile?.status;
-  const isVip = status && status.toUpperCase() === 'VIP';
+  const isVip = await getUserVip(userId);
   const price = isVip ? 80.0 : 100.0;
-  console.log('Base price', { userId, status, price });
+  console.log('Base price', { userId, isVip, price });
   return price;
 }
 
