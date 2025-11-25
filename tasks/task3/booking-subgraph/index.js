@@ -15,17 +15,49 @@ const typeDefs = gql`
   type Query {
     bookingsByUser(userId: String!): [Booking]
   }
-
 `;
+
+// Общая заглушка
+function getStubBooking(userId, id = 'b1') {
+  return {
+    id,
+    userId,
+    hotelId: 'h1',
+    discountPercent: 20,
+    promoCode: 'SUMMER',
+  };
+}
 
 const resolvers = {
   Query: {
     bookingsByUser: async (_, { userId }, { req }) => {
-		// TODO: Реальный вызов к grpc booking-сервису или заглушка + ACL
+      // ACL: разрешаем только запросы самого пользователя
+      const requesterUserId = req?.headers?.['userid'];
+      if (!requesterUserId || requesterUserId !== userId) {
+        return [];
+      }
+
+      // TODO: заменить заглушку на реальный источник (DB/REST/gRPC)
+      return [getStubBooking(userId)];
     },
   },
   Booking: {
-	  // TODO: Реальный вызов к grpc booking-сервису или заглушка + ACL
+    // Федеративный резолвер для ссылки на Booking по id
+    __resolveReference: async (reference, { req }) => {
+      const requesterUserId = req?.headers?.['userid'];
+      if (!requesterUserId) {
+        return null;
+      }
+
+      // TODO: заменить заглушку на реальный источник по reference.id
+      const booking = getStubBooking(requesterUserId, reference?.id ?? 'b1');
+
+      // ACL: возвращаем только если запись принадлежит пользователю
+      if (booking.userId !== requesterUserId) {
+        return null;
+      }
+      return booking;
+    },
   },
 };
 
