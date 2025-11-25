@@ -9,8 +9,28 @@ export const pool = new Pool({
   database: process.env.POSTGRES_DB || 'booking_history'
 });
 
+// Added retry config + helpers
+const RETRIES = +(process.env.BOOKING_DB_CONNECT_RETRIES || 10);
+const DELAY_MS = +(process.env.BOOKING_DB_CONNECT_DELAY_MS || 3000);
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function ensureDb() {
+  for (let attempt = 1; attempt <= RETRIES; attempt++) {
+    try {
+      await pool.query('SELECT 1');
+      console.log(`DB connected after ${attempt} attempts`);
+      return;
+    } catch (err) {
+      console.error(`DB connect attempt ${attempt}/${RETRIES} failed: ${err.code || err.message}`);
+      if (attempt === RETRIES) throw err;
+      await sleep(DELAY_MS);
+    }
+  }
+}
+
 export async function initDb() {
-  await pool.query('SELECT 1');
+  await ensureDb();
   await pool.query(`
     CREATE TABLE IF NOT EXISTS booking_history (
       id BIGSERIAL PRIMARY KEY,
