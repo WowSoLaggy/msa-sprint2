@@ -3,7 +3,7 @@ version: "3.8"
 services:
   monolith:
     build:
-      context: ../monolith
+      context: .
       dockerfile: Dockerfile
     container_name: hotelio-monolith
     ports:
@@ -52,8 +52,85 @@ services:
     networks:
       - hotelio-net
 
+  booking-service:
+    build:
+      context: ../hotelio/booking_service
+      dockerfile: Dockerfile
+    container_name: booking-service
+    environment:
+      PORT: 9090
+      HTTP_PORT: 9091
+      MONOLITH_HOST: monolith
+      MONOLITH_PORT: 8080
+      BOOKING_DB_HOST: booking-db
+      BOOKING_DB_PORT: 5432
+      BOOKING_DB_USER: booking
+      BOOKING_DB_PASSWORD: booking
+      BOOKING_DB_NAME: booking
+      KAFKA_BROKERS: kafka:9092
+      BOOKING_CREATED_TOPIC: booking.created
+    networks:
+      - hotelio-net
+    ports:
+      - "9090:9090"
+      - "9091:9091"
+    depends_on:
+      - booking-db
+
+  booking-db:
+    image: postgres:15
+    container_name: booking-db
+    environment:
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+      POSTGRES_DB: booking
+    ports:
+      - "5433:5432"
+    volumes:
+      - booking-db-data:/var/lib/postgresql/data
+    networks:
+      - hotelio-net
+
+  booking-history-service:
+    build:
+      context: ../hotelio/booking_history_service
+      dockerfile: Dockerfile
+    container_name: booking-history-service
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      BOOKING_CREATED_TOPIC: booking.created
+      POSTGRES_HOST: booking-history-db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: booking_history
+      POSTGRES_PASSWORD: booking_history
+      POSTGRES_DB: booking_history
+      PORT: 9094
+    networks:
+      - hotelio-net
+    ports:
+      - "9094:9094"
+    depends_on:
+      - booking-history-db
+      - kafka
+
+  booking-history-db:
+    image: postgres:15
+    container_name: booking-history-db
+    environment:
+      POSTGRES_USER: booking_history
+      POSTGRES_PASSWORD: booking_history
+      POSTGRES_DB: booking_history
+    ports:
+      - "5434:5432"
+    volumes:
+      - booking-history-db-data:/var/lib/postgresql/data
+    networks:
+      - hotelio-net
+
 volumes:
   monolith-db-data:
+  booking-db-data:
+  booking-history-db-data:
 
 networks:
   hotelio-net:

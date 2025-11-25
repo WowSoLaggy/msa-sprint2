@@ -1,0 +1,9 @@
+CONTAINER ID   IMAGE                                      COMMAND                  CREATED             STATUS             PORTS                                                             NAMES
+a57c6bf90553   hotelio-monolith-booking-service           "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:9090-9091->9090-9091/tcp, [::]:9090-9091->9090-9091/tcp   booking-service
+8b56fb32d189   hotelio-monolith-booking-history-service   "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:9094->9094/tcp, [::]:9094->9094/tcp                       booking-history-service
+78d425dfe5cb   postgres:15                                "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:5433->5432/tcp, [::]:5433->5432/tcp                       booking-db
+a9b143ad957d   postgres:15                                "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:5434->5432/tcp, [::]:5434->5432/tcp                       booking-history-db
+728cdea93442   postgres:15                                "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                       hotelio-db
+42f2f98272b5   hotelio-monolith-monolith                  "java -jar app.jar"      About an hour ago   Up About an hour   0.0.0.0:8084->8080/tcp, [::]:8084->8080/tcp                       hotelio-monolith
+fc2cb4eeae2d   confluentinc/cp-zookeeper:7.2.1            "/etc/confluent/dock…"   About an hour ago   Up About an hour   2888/tcp, 0.0.0.0:2181->2181/tcp, [::]:2181->2181/tcp, 3888/tcp   hotelio-monolith-zookeeper-1
+59ebcdfbac94   confluentinc/cp-kafka:7.2.1                "/etc/confluent/dock…"   About an hour ago   Up About an hour   0.0.0.0:9092->9092/tcp, [::]:9092->9092/tcp                       hotelio-monolith-kafka-1

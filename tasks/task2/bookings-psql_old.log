@@ -1,0 +1,3 @@
+ERROR:  relation "bookings" does not exist
+LINE 1: SELECT * FROM bookings ORDER BY created_at DESC;
+                      ^
