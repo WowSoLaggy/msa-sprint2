@@ -16,15 +16,27 @@ const typeDefs = gql`
   }
 `;
 
+// Заглушка получения одного отеля
+function getStubHotel(id) {
+  return {
+    id,
+    name: `Hotel ${id}`,
+    city: 'Sample City',
+    stars: 4,
+  };
+}
+
 const resolvers = {
   Hotel: {
     __resolveReference: async ({ id }) => {
-      // TODO: Реальный вызов к hotel-сервису или заглушка
+      // TODO: заменить на реальный вызов (DB/REST/gRPC)
+      return getStubHotel(id);
     },
   },
   Query: {
     hotelsByIds: async (_, { ids }) => {
-      // TODO: Заглушка или REST-запрос
+      // TODO: заменить на батч-запрос к внешнему сервису
+      return ids.map(getStubHotel);
     },
   },
 };
