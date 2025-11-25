@@ -1,6 +1,6 @@
 import { pool } from './db.js';
 import { getUserActive, getUserBlacklisted, getUserVip, getHotelOperational, getHotelTrusted, getHotelFullyBooked, validatePromo } from './externalClients.js';
-
+import { publishBookingCreated } from './bookingEvents.js';
 
 export async function listBookings(userId) {
   let query;
@@ -70,6 +70,9 @@ export async function createBooking({ userId, hotelId, promoCode }) {
     created_at: new Date(inserted.created_at).toISOString()
   };
   console.log('Created booking', retVal);
+
+  // Publish domain event (fire-and-forget with internal error handling)
+  publishBookingCreated(retVal);
 
   return retVal;
 }

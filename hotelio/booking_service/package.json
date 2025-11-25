@@ -10,6 +10,7 @@
   "dependencies": {
     "pg": "^8.11.5",
     "@grpc/grpc-js": "^1.10.6",
-    "@grpc/proto-loader": "^0.7.13"
+    "@grpc/proto-loader": "^0.7.13",
+    "kafkajs": "^2.2.4"
   }
 }
