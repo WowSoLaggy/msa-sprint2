@@ -22,6 +22,16 @@ const typeDefs = gql`
   }
 `;
 
+// Общая заглушка бронирования (userId фиксирован)
+function getStubBooking(id = 'b1') {
+  return {
+    id,
+    userId: 'user1',
+    hotelId: 'h1',
+    discountPercent: 20,
+    promoCode: 'SUMMER',
+  };
+}
 
 const resolvers = {
   Query: {
@@ -33,15 +43,7 @@ const resolvers = {
       }
 
       // TODO: заменить заглушку на реальный источник (DB/REST/gRPC)
-      return [
-        {
-          id: 'b1',
-          userId,
-          hotelId: 'h1',
-          discountPercent: 20,
-          promoCode: 'SUMMER',
-        },
-      ];
+      return [getStubBooking()];
     },
   },
   Booking: {
@@ -54,13 +56,7 @@ const resolvers = {
       }
 
       // TODO: заменить заглушку на реальный источник по reference.id
-      const booking = {
-        id: reference?.id ?? 'b1',
-        userId: requesterUserId,
-        hotelId: 'h1',
-        discountPercent: 20,
-        promoCode: 'SUMMER',
-      };
+      const booking = getStubBooking(reference?.id ?? 'b1');
 
       // ACL: возвращаем только если запись принадлежит пользователю
       if (booking.userId !== requesterUserId) {
