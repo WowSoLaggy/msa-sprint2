@@ -4,12 +4,17 @@ import { buildSubgraphSchema } from '@apollo/subgraph';
 import gql from 'graphql-tag';
 
 const typeDefs = gql`
+  extend type Hotel @key(fields: "id") {
+    id: ID!
+  }
+
   type Booking @key(fields: "id") {
     id: ID!
     userId: String!
     hotelId: String!
     promoCode: String
     discountPercent: Int
+    hotel: Hotel
   }
 
   type Query {
@@ -17,16 +22,6 @@ const typeDefs = gql`
   }
 `;
 
-// Общая заглушка
-function getStubBooking(userId, id = 'b1') {
-  return {
-    id,
-    userId,
-    hotelId: 'h1',
-    discountPercent: 20,
-    promoCode: 'SUMMER',
-  };
-}
 
 const resolvers = {
   Query: {
@@ -38,10 +33,19 @@ const resolvers = {
       }
 
       // TODO: заменить заглушку на реальный источник (DB/REST/gRPC)
-      return [getStubBooking(userId)];
+      return [
+        {
+          id: 'b1',
+          userId,
+          hotelId: 'h1',
+          discountPercent: 20,
+          promoCode: 'SUMMER',
+        },
+      ];
     },
   },
   Booking: {
+    hotel: (parent) => ({ id: parent.hotelId }),
     // Федеративный резолвер для ссылки на Booking по id
     __resolveReference: async (reference, { req }) => {
       const requesterUserId = req?.headers?.['userid'];
@@ -50,7 +54,13 @@ const resolvers = {
       }
 
       // TODO: заменить заглушку на реальный источник по reference.id
-      const booking = getStubBooking(requesterUserId, reference?.id ?? 'b1');
+      const booking = {
+        id: reference?.id ?? 'b1',
+        userId: requesterUserId,
+        hotelId: 'h1',
+        discountPercent: 20,
+        promoCode: 'SUMMER',
+      };
 
       // ACL: возвращаем только если запись принадлежит пользователю
       if (booking.userId !== requesterUserId) {

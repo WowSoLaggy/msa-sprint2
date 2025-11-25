@@ -8,6 +8,9 @@ services:
     depends_on:
       - booking-subgraph
       - hotel-subgraph
+    environment:
+      BOOKING_URL: http://booking-subgraph:4001/
+      HOTEL_URL: http://hotel-subgraph:4002/
 
   booking-subgraph:
     build: ./booking-subgraph
