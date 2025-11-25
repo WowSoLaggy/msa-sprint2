@@ -67,6 +67,7 @@ services:
       BOOKING_DB_USER: booking
       BOOKING_DB_PASSWORD: booking
       BOOKING_DB_NAME: booking
+      KAFKA_BROKERS: kafka:9092
     networks:
       - hotelio-net
     ports:
