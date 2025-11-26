@@ -17,7 +17,7 @@ const gateway = new ApolloGateway({
   buildService({ url }) {
     return new RemoteGraphQLDataSource({
       url,
-      // Проксируем все входящие заголовки (включая userid) в подграфы
+      // Проксируем все входящие заголовки (включая userId) в подграфы
       willSendRequest({ request, context }) {
         const headers = context?.headers || {};
         for (const [k, v] of Object.entries(headers)) {

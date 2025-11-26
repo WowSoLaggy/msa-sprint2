@@ -36,32 +36,42 @@ function getStubBooking(id = 'b1') {
 const resolvers = {
   Query: {
     bookingsByUser: async (_, { userId }, { req }) => {
-      // ACL: разрешаем только запросы самого пользователя
+
       const requesterUserId = req?.headers?.['userid'];
+      console.log('[bookingsByUser] Requestor userId:', requesterUserId);
+      console.log('[bookingsByUser] Requested userId:', userId);
       if (!requesterUserId || requesterUserId !== userId) {
+        console.log('[bookingsByUser] Forbidden: Can request only own bookings')
         return [];
       }
 
-      // TODO: заменить заглушку на реальный источник (DB/REST/gRPC)
-      return [getStubBooking()];
+      let allBookings = [ getStubBooking() ];
+      console.log('[bookingsByUser] All bookings:', allBookings);
+      allBookings = allBookings.filter(b => b.userId === userId);
+      console.log('[bookingsByUser] Filtered bookings:', allBookings);
+
+      return allBookings;
     },
   },
   Booking: {
     hotel: (parent) => ({ id: parent.hotelId }),
-    // Федеративный резолвер для ссылки на Booking по id
+
     __resolveReference: async (reference, { req }) => {
       const requesterUserId = req?.headers?.['userid'];
+      console.log('[Booking.__resolveReference] Requestor userId:', requesterUserId);
       if (!requesterUserId) {
+        console.log('[Booking.__resolveReference] Forbidden: No userId in headers')
         return null;
       }
 
-      // TODO: заменить заглушку на реальный источник по reference.id
       const booking = getStubBooking(reference?.id ?? 'b1');
 
-      // ACL: возвращаем только если запись принадлежит пользователю
       if (booking.userId !== requesterUserId) {
+        console.log('[Booking.__resolveReference] Forbidden: Can access only own booking')
         return null;
       }
+
+      console.log('[Booking.__resolveReference] Resolved booking:', booking);
       return booking;
     },
   },

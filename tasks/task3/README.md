@@ -9,22 +9,21 @@ docker compose up -d --build
 
 ## 🚀 Проверка корректности
 
-Выполните следующий GraphQL-запрос через GraphQL Playground на http://localhost:4000/:
+Проверка своих бронирований:
+```bash
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -H "userId: user1" \
+  -d '{"query": "query { bookingsByUser(userId:\"user1\") { id hotel { name city } discountPercent } }"}'
 ```
-graphql
-	query {
-		bookingsByUser(userId: "user1") {
-			id
-			hotel {
-				name
-				city
-			}
-			discountPercent
-		}
-	}
+
+Проверка чужих бронирований:
+```bash
+curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -H "userId: user2" \
+  -d '{"query": "query { bookingsByUser(userId:\"user1\") { id hotel { name city } discountPercent } }"}'
 ```
-Можно запрашивать больше данных.
-Перед этим добавьте заголовок userid: user1, иначе данные не вернутся из-за ACL.
 
 ---
 
