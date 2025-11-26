@@ -4,21 +4,17 @@ import { buildSubgraphSchema } from '@apollo/subgraph';
 import gql from 'graphql-tag';
 
 const typeDefs = gql`
-  extend type Hotel @key(fields: "id") {
-    id: ID!
-  }
-
   type Booking @key(fields: "id") {
     id: ID!
-    userId: String!
-    hotelId: String!
+    userId: ID!
+    hotelId: ID!
     promoCode: String
     discountPercent: Int
-    hotel: Hotel
   }
 
   type Query {
-    bookingsByUser(userId: String!): [Booking]
+    bookingsByUser(userId: ID!): [Booking!]!
+    booking(id: ID!): Booking
   }
 `;
 
@@ -28,8 +24,8 @@ function getStubBooking(id = 'b1') {
     id,
     userId: 'user1',
     hotelId: 'h1',
-    discountPercent: 20,
     promoCode: 'SUMMER',
+    discountPercent: 20,
   };
 }
 

@@ -8,9 +8,11 @@ services:
     depends_on:
       - booking-subgraph
       - hotel-subgraph
+      - promocode-subgraph
     environment:
       BOOKING_URL: http://booking-subgraph:4001/
       HOTEL_URL: http://hotel-subgraph:4002/
+      PROMO_URL: http://promocode-subgraph:4003/
 
   booking-subgraph:
     build: ./booking-subgraph
@@ -21,3 +23,8 @@ services:
     build: ./hotel-subgraph
     ports:
       - "4002:4002"
+
+  promocode-subgraph:
+    build: ./promocode-subgraph
+    ports:
+      - "4003:4003"

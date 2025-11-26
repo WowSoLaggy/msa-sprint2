@@ -16,7 +16,6 @@ const typeDefs = gql`
   }
 `;
 
-// Заглушка получения одного отеля
 function getStubHotel(id) {
   return {
     id,
@@ -29,13 +28,11 @@ function getStubHotel(id) {
 const resolvers = {
   Hotel: {
     __resolveReference: async ({ id }) => {
-      // TODO: заменить на реальный вызов (DB/REST/gRPC)
       return getStubHotel(id);
     },
   },
   Query: {
     hotelsByIds: async (_, { ids }) => {
-      // TODO: заменить на батч-запрос к внешнему сервису
       return ids.map(getStubHotel);
     },
   },
