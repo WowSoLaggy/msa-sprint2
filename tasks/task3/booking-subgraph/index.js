@@ -18,10 +18,27 @@ const typeDefs = gql`
 
 `;
 
+const bookings = [
+  { id: 'b1', userId: 'user1', hotelId: 'h1', promoCode: 'SUPER25', discountPercent: 25 },
+  { id: 'b2', userId: 'user1', hotelId: 'h2', promoCode: null, discountPercent: 0 },
+  { id: 'b3', userId: 'user2', hotelId: 'h1', promoCode: 'HOTEL10', discountPercent: 10 },
+]
+
 const resolvers = {
   Query: {
     bookingsByUser: async (_, { userId }, { req }) => {
-		// TODO: Реальный вызов к grpc booking-сервису или заглушка + ACL
+      
+      const requesterUserId = req?.headers?.['userid'];
+      console.log('[Query.bookingsByUser] Requester iserId:', requesterUserId);
+      console.log('[Query.bookingsByUser] Requested userId:', userId);
+      if (!requesterUserId || requesterUserId !== userId) {
+        console.log('[Query.bookingsByUser] Access denied: userId mismatch or missing');
+        return [];
+      }
+
+      let filteredBookings = bookings.filter(b => b.userId === userId);
+      console.log(`[Query.bookingsByUser] Filtered bookings:`, filteredBookings);
+      return filteredBookings;
     },
   },
   Booking: {

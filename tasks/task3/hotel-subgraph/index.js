@@ -16,10 +16,19 @@ const typeDefs = gql`
   }
 `;
 
+const hotels = [
+  { id: 'h1', name: 'Grand Hotel', city: 'New York', stars: 5 },
+  { id: 'h2', name: 'Budget Inn', city: 'Los Angeles', stars: 3 },
+  { id: 'h3', name: 'Sea View Resort', city: 'Miami', stars: 4 },
+]
+
 const resolvers = {
   Hotel: {
     __resolveReference: async ({ id }) => {
-      // TODO: Реальный вызов к hotel-сервису или заглушка
+      console.log('[Hotel.__resolveReference] id:', id);
+      const hotel = hotels.find(h => h.id === id);
+      console.log('[Hotel.__resolveReference] found hotel:', hotel);
+      return hotel;
     },
   },
   Query: {
