@@ -10,15 +10,15 @@ const typeDefs = gql`
 
   type Booking @key(fields: "id") {
     id: ID!
-    userId: String!
-    hotelId: String!
+    userId: ID!
+    hotelId: ID!
     promoCode: String
     discountPercent: Int
     hotel: Hotel
   }
 
   type Query {
-    bookingsByUser(userId: String!): [Booking]
+    bookingsByUser(userId: ID!): [Booking]
   }
 
 `;
