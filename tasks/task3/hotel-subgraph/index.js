@@ -33,7 +33,7 @@ const resolvers = {
   },
   Query: {
     hotelsByIds: async (_, { ids }) => {
-      // TODO: Заглушка или REST-запрос
+      console.log('[Query.hotelsByIds] Not implemented');
     },
   },
 };

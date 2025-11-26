@@ -4,12 +4,17 @@ import { buildSubgraphSchema } from '@apollo/subgraph';
 import gql from 'graphql-tag';
 
 const typeDefs = gql`
+  extend type Hotel @key(fields: "id") {
+    id: ID!
+  }
+
   type Booking @key(fields: "id") {
     id: ID!
     userId: String!
     hotelId: String!
     promoCode: String
     discountPercent: Int
+    hotel: Hotel
   }
 
   type Query {
@@ -29,7 +34,7 @@ const resolvers = {
     bookingsByUser: async (_, { userId }, { req }) => {
       
       const requesterUserId = req?.headers?.['userid'];
-      console.log('[Query.bookingsByUser] Requester iserId:', requesterUserId);
+      console.log('[Query.bookingsByUser] Requester userId:', requesterUserId);
       console.log('[Query.bookingsByUser] Requested userId:', userId);
       if (!requesterUserId || requesterUserId !== userId) {
         console.log('[Query.bookingsByUser] Access denied: userId mismatch or missing');
@@ -42,7 +47,7 @@ const resolvers = {
     },
   },
   Booking: {
-	  // TODO: Реальный вызов к grpc booking-сервису или заглушка + ACL
+	  hotel: (parent) => ({ id: parent.hotelId }),
   },
 };
 
