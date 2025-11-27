@@ -1,0 +1,111 @@
+stages:
+  - build
+  - test
+  - deploy
+  - tag
+
+variables:
+  IMAGE_TAG: latest
+  IMAGE_NAME: booking-service
+  DOCKERFILE_PATH: booking-service/Dockerfile
+  HELM_CHART_PATH: helm/booking-service
+
+build:
+  stage: build
+  script:
+    - echo "Building Docker image..."
+    - cd booking-service
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+    - echo "Docker image built successfully"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+
+test:
+  stage: test
+  script:
+    - echo "Starting container for testing..."
+    - CONTAINER_ID=$(docker run -d -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG})
+    - echo "Container started with ID: $CONTAINER_ID"
+    - echo "Waiting for service to start..."
+    - sleep 10
+    - echo "Testing /ping endpoint..."
+    - |
+      for i in {1..30}; do
+        if curl -f http://localhost:8080/ping > /dev/null 2>&1; then
+          echo "✅ /ping endpoint test passed"
+          PING_RESULT=$(curl -s http://localhost:8080/ping)
+          echo "Response: $PING_RESULT"
+          if [ "$PING_RESULT" = "pong" ]; then
+            echo "✅ Correct response received"
+            break
+          else
+            echo "❌ Unexpected response: $PING_RESULT"
+            exit 1
+          fi
+        else
+          echo "Attempt $i: Service not ready, waiting..."
+          sleep 2
+        fi
+        if [ $i -eq 30 ]; then
+          echo "❌ Service failed to start after 60 seconds"
+          docker logs $CONTAINER_ID
+          exit 1
+        fi
+      done
+    - echo "Cleaning up test container..."
+    - docker rm -f $CONTAINER_ID
+    - echo "Test completed successfully"
+  dependencies:
+    - build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Loading image into Minikube..."
+    - minikube image load ${IMAGE_NAME}:${IMAGE_TAG}
+    - echo "Image loaded into Minikube successfully"
+    - echo "Deploying to Kubernetes using Helm..."
+    - |
+      if helm list -q | grep -q "^booking-service$"; then
+        echo "Upgrading existing release..."
+        helm upgrade booking-service ${HELM_CHART_PATH} \
+          --set image.name=${IMAGE_NAME} \
+          --set image.tag=${IMAGE_TAG} \
+          --wait --timeout=300s
+      else
+        echo "Installing new release..."
+        helm install booking-service ${HELM_CHART_PATH} \
+          --set image.name=${IMAGE_NAME} \
+          --set image.tag=${IMAGE_TAG} \
+          --wait --timeout=300s
+      fi
+    - echo "Deployment completed successfully"
+    - echo "Checking deployment status..."
+    - kubectl get deployment booking-service
+    - kubectl get service booking-service
+    - kubectl get pods -l app.kubernetes.io/name=booking-service
+  dependencies:
+    - test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+
+tag:
+  stage: tag
+  script:
+    - echo "Creating Git tag with timestamp..."
+    - TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+    - TAG_NAME="deploy_${TIMESTAMP}"
+    - echo "Creating tag: $TAG_NAME"
+    - git config user.name "GitLab CI"
+    - git config user.email "ci@gitlab.com"
+    - git tag -a "$TAG_NAME" -m "Deployment tag created at $TIMESTAMP"
+    - echo "✅ Tag $TAG_NAME created successfully"
+    - echo "To push the tag to remote, run: git push origin $TAG_NAME"
+  dependencies:
+    - deploy
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+  when: manual
+ 

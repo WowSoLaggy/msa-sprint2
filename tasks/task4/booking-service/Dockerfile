@@ -20,6 +20,9 @@ RUN chmod +x check-dns.sh
 # Ожидаемый код:
 RUN go build -o booking-service main.go
 
+# Открыть порт 8080
+EXPOSE 8080
+
 # TODO: Задать команду запуска
 # Ожидаемый код:
 CMD ["./booking-service"]

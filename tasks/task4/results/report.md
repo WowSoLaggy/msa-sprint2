@@ -1,5 +1,7 @@
 # Описание изменений и решений
 
+## Запуск сервиса вручную в minikube
+
 Подготовить образ `booking-service`:
 ```sh
 cd tasks/task4/
@@ -60,3 +62,21 @@ kubectl port-forward deployment/booking-service 8080:8080 &
 curl localhost:8080/ready
 curl localhost:8080/ping
 ```
+
+## Реализованный CI/CD пайплайн
+
+### 1. Создан полный .gitlab-ci.yml с 4 стадиями:
+- **build**: сборка Docker образа `booking-service:latest`
+- **test**: запуск контейнера + проверка `/ping` эндпоинта + очистка
+- **deploy**: `minikube image load` + `helm upgrade/install`
+- **tag**: создание Git тега с timestamp (manual стадия)
+
+### 2. Доработан Dockerfile:
+- Удалены TODO, добавлен curl, EXPOSE 8080, права для скриптов
+
+### 3. Созданы values файлы:
+- **values-staging.yaml**: 1 реплика, ENABLE_FEATURE_X=true
+- **values-prod.yaml**: 3 реплики, ENABLE_FEATURE_X=false
+
+### 4. Скрипты тестирования:
+- **test-pipeline.sh** и **test-pipeline.ps1** для автоматического запуска пайплайна
