@@ -2,6 +2,7 @@ import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { buildSubgraphSchema } from '@apollo/subgraph';
 import gql from 'graphql-tag';
+import DataLoader from 'dataloader';
 
 const typeDefs = gql`
   type Hotel @key(fields: "id") {
@@ -12,7 +13,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    hotelsByIds(ids: [ID!]!): [Hotel]
+    hotelsByIds(ids: [ID!]!): [Hotel]!
   }
 `;
 
@@ -24,16 +25,15 @@ const hotels = [
 
 const resolvers = {
   Hotel: {
-    __resolveReference: async ({ id }) => {
-      console.log('[Hotel.__resolveReference] id:', id);
-      const hotel = hotels.find(h => h.id === id);
-      console.log('[Hotel.__resolveReference] found hotel:', hotel);
-      return hotel;
+    __resolveReference: async ({ id }, { hotelLoader }) => {
+      console.log('[Hotel.__resolveReference] load id:', id);
+      return hotelLoader.load(id);
     },
   },
   Query: {
-    hotelsByIds: async (_, { ids }) => {
-      console.log('[Query.hotelsByIds] Not implemented');
+    hotelsByIds: async (_, { ids }, { hotelLoader }) => {
+      console.log('[Query.hotelsByIds] requested ids:', ids);
+      return hotelLoader.loadMany(ids);
     },
   },
 };
@@ -44,6 +44,14 @@ const server = new ApolloServer({
 
 startStandaloneServer(server, {
   listen: { port: 4002 },
+  context: async () => {
+    const hotelLoader = new DataLoader(async (ids) => {
+      console.log('[DataLoader.batch] ids:', ids);
+      // Preserve order: map each id to its hotel (or null if not found)
+      return ids.map(id => hotels.find(h => h.id === id) || null);
+    }, { cache: true });
+    return { hotelLoader };
+  },
 }).then(() => {
   console.log('✅ Hotel subgraph ready at http://localhost:4002/');
 });
