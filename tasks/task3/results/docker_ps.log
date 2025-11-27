@@ -1,0 +1,5 @@
+CONTAINER ID   IMAGE                      COMMAND                  CREATED         STATUS         PORTS                                         NAMES
+e7dcf2238cc7   task3-apollo-gateway       "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   0.0.0.0:4000->4000/tcp, [::]:4000->4000/tcp   task3-apollo-gateway-1
+f6ef1fa1aa51   task3-hotel-subgraph       "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   0.0.0.0:4002->4002/tcp, [::]:4002->4002/tcp   task3-hotel-subgraph-1
+c8faf202b827   task3-promocode-subgraph   "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   0.0.0.0:4003->4003/tcp, [::]:4003->4003/tcp   task3-promocode-subgraph-1
+db87f3f11d70   task3-booking-subgraph     "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes   0.0.0.0:4001->4001/tcp, [::]:4001->4001/tcp   task3-booking-subgraph-1
