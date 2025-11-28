@@ -9,7 +9,7 @@ RUN apk add --no-cache curl
 WORKDIR /app
 
 # Копируем Go-файл
-COPY main.go .
+COPY . .
 
 # VERSION может быть v1 или v2. По умолчанию v1.
 ARG VERSION=v1
