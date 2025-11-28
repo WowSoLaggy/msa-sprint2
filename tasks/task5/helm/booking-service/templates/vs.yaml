@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: booking-vs
+spec:
+  hosts:
+    - booking.local
+  gateways:
+    - booking-gw
+  http:
+  - match:
+    - headers:
+        x-feature-enabled:
+          exact: "true"
+    route:
+    - destination:
+        host: booking.default.svc.cluster.local
+        subset: v2
+  - route:
+    - destination:
+        host: booking.default.svc.cluster.local
+        subset: v1
+      weight: 90
+    - destination:
+        host: booking.default.svc.cluster.local
+        subset: v2
+      weight: 10

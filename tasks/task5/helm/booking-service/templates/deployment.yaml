@@ -1,21 +1,24 @@
+# deployment.yaml (multi-version)
+{{- range $v := .Values.versions }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.app.name }}-v1
+  name: {{ $.Values.app.name }}-{{ $v }}
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.app.name }}
-      version: v1
+      app: {{ $.Values.app.name }}
+      version: {{ $v }}
   template:
     metadata:
       labels:
-        app: {{ .Values.app.name }}
-        version: v1
+        app: {{ $.Values.app.name }}
+        version: {{ $v }}
     spec:
       containers:
-        - name: {{ .Values.app.name }}
-          image: {{ .Values.image.name }}:v1
+        - name: {{ $.Values.app.name }}
+          image: {{ $.Values.image.name }}:{{ $v }}
           ports:
-            - containerPort: {{ .Values.service.port }}
+            - containerPort: {{ $.Values.service.port }}
+---
+{{- end }}
