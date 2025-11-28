@@ -104,7 +104,7 @@ deployment "booking-v2" successfully rolled out
 
 ## Пробрасывание порта
 
-Пробросим порт 9090 на хост-машину:
+Пробросим порт на хост-машину:
 ```sh
-kubectl -n default port-forward svc/booking 9090:9090
+kubectl -n istio-system port-forward svc/istio-ingressgateway 8080:80
 ```
