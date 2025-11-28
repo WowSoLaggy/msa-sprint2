@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: booking-v1
-  namespace: default
 spec:
   replicas: 1
   selector:
@@ -25,7 +24,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: booking-v2
-  namespace: default
 spec:
   replicas: 1
   selector:
@@ -43,12 +41,17 @@ spec:
           image: booking-service:v2
           ports:
             - containerPort: 8080
+
+
+
 ---
+
+
+
 apiVersion: v1
 kind: Service
 metadata:
   name: booking
-  namespace: default
 spec:
   selector:
     app: booking
@@ -56,33 +59,17 @@ spec:
     - port: 9090
       targetPort: 8080
       name: http
+
+
+
 ---
-apiVersion: networking.istio.io/v1beta1
-kind: DestinationRule
-metadata:
-  name: booking-dr
-  namespace: default
-spec:
-  host: booking.default.svc.cluster.local
-  trafficPolicy:
-    outlierDetection:
-      consecutive5xxErrors: 5
-      interval: 30s
-      baseEjectionTime: 30s
-      maxEjectionPercent: 50
-  subsets:
-    - name: v1
-      labels:
-        version: v1
-    - name: v2
-      labels:
-        version: v2
+
+
 
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
   name: booking-gw
-  namespace: default
 spec:
   selector:
     istio: ingressgateway
@@ -94,27 +81,42 @@ spec:
       hosts:
         - booking.local
 
+
+
+---
+
+
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: booking-dr
+spec:
+  host: booking
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: booking-vs
-  namespace: default
 spec:
   hosts:
     - booking.local
   gateways:
     - booking-gw
   http:
-    - retries:
-        attempts: 2
-        perTryTimeout: 1s
-        retryOn: gateway-error,connect-failure,refused-stream,5xx
-      route:
-        - destination:
-            host: booking.default.svc.cluster.local
-            subset: v1
-          weight: 90
-        - destination:
-            host: booking.default.svc.cluster.local
-            subset: v2
-          weight: 10
+  - route:
+    - destination:
+        host: booking.default.svc.cluster.local
+        subset: v1
+      weight: 90
+    - destination:
+        host: booking.default.svc.cluster.local
+        subset: v2
+      weight: 10
