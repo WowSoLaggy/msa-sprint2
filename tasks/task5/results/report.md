@@ -108,3 +108,17 @@ deployment "booking-v2" successfully rolled out
 ```sh
 kubectl -n istio-system port-forward svc/istio-ingressgateway 8080:80
 ```
+
+## Проверка canary
+
+Чтоб проверить распределение по подам:
+```sh
+./check-canary.sh
+```
+
+Вывод будет примерно:
+```sh
+▶️ Checking canary release (90% v1, 10% v2)...
+     88 v1
+     12 v2
+```
