@@ -1,30 +1,10 @@
-appName: booking
+replicaCount: 2
 
-images:
-  v1: booking-service:v1
-  v2: booking-service:v2
+app:
+  name: booking
 
-replicaCount:
-  v1: 1
-  v2: 1
+image:
+  name: booking-service
 
 service:
-  port: 9090
-  targetPort: 8080
-
-canary:
-  v1Weight: 90
-  v2Weight: 10
-
-featureFlag:
-  enabled: true
-  headerName: X-Feature-Enabled
-  headerValue: "true"
-
-istio:
-  host: booking.local
-  gateway:
-    name: booking-gw
-  ingressLabel:
-    key: istio
-    value: ingressgateway
+  port: 8080
