@@ -8,17 +8,18 @@ RUN apk add --no-cache curl
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем Go-файл и скрипт проверки DNS
+# Копируем Go-файл
 COPY main.go .
-COPY check-dns.sh .
 
-# TODO: Сделать скрипт исполняемым
-# Ожидаемый код:
-RUN chmod +x check-dns.sh
+# VERSION может быть v1 или v2. По умолчанию v1.
+ARG VERSION=v1
 
-# TODO: Собрать бинарник из main.go
-# Ожидаемый код:
-RUN go build -o booking-service main.go
+# Выбираем нужный файл для сборки
+RUN if [ "$VERSION" = "v2" ]; then \
+      go build -o booking-service ./main_v2.go; \
+    else \
+      go build -o booking-service ./main_v1.go; \
+    fi
 
 # Открыть порт 8080
 EXPOSE 8080
