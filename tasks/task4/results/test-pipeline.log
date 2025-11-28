@@ -1,0 +1,167 @@
+laggy@compute-vm-4-8-50-ssd-1762761559641:~/projects/msa-sprint2/tasks/task4$ ./test-pipeline.sh 
+🚀 Запуск CI/CD пайплайна с gitlab-ci-local
+==============================================
+✅ Все зависимости проверены
+
+1️⃣ Запуск стадии build...
+parsing and downloads finished in 112 ms.
+json schema validated in 462 ms
+build starting shell (build)
+build $ echo "Building Docker image..."
+build > Building Docker image...
+build $ cd booking-service
+build $ docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+build > #0 building with "default" instance using docker driver
+build > 
+build > #1 [internal] load build definition from Dockerfile
+build > #1 transferring dockerfile: 890B done
+build > #1 DONE 0.1s
+build > 
+build > #2 [internal] load metadata for docker.io/library/golang:1.21-alpine
+build > #2 DONE 1.0s
+build > 
+build > #3 [internal] load .dockerignore
+build > #3 transferring context: 2B done
+build > #3 DONE 0.0s
+build > 
+build > #4 [1/7] FROM docker.io/library/golang:1.21-alpine@sha256:2414035b086e3c42b99654c8b26e6f5b1b1598080d65fd03c7f499552ff4dc94
+build > #4 DONE 0.0s
+build > 
+build > #5 [internal] load build context
+build > #5 transferring context: 61B done
+build > #5 DONE 0.0s
+build > 
+build > #6 [6/7] RUN chmod +x check-dns.sh
+build > #6 CACHED
+build > 
+build > #7 [5/7] COPY check-dns.sh .
+build > #7 CACHED
+build > 
+build > #8 [3/7] WORKDIR /app
+build > #8 CACHED
+build > 
+build > #9 [4/7] COPY main.go .
+build > #9 CACHED
+build > 
+build > #10 [2/7] RUN apk add --no-cache curl
+build > #10 CACHED
+build > 
+build > #11 [7/7] RUN go build -o booking-service main.go
+build > #11 CACHED
+build > 
+build > #12 exporting to image
+build > #12 exporting layers done
+build > #12 writing image sha256:fe5058bb5da7ea061bbc4865a62e8358c0edc7ea7486f3146ebfaf3589a43f25 done
+build > #12 naming to docker.io/library/booking-service:latest done
+build > #12 DONE 0.0s
+build $ echo "Docker image built successfully"
+build > Docker image built successfully
+build finished in 1.56 s
+
+ PASS  build
+✅ Стадия build завершена успешно
+
+2️⃣ Запуск стадии test...
+parsing and downloads finished in 119 ms.
+json schema validated in 450 ms
+test starting shell (test)
+test $ echo "Starting container for testing..."
+test > Starting container for testing...
+test $ CONTAINER_ID=$(docker run -d -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG})
+test $ echo "Container started with ID $CONTAINER_ID"
+test > Container started with ID 42e89f869a08ab08ff0d0f6018c19551d2ba61a157fa553595bd6089c9de699c
+test $ echo "Waiting for service to start..."
+test > Waiting for service to start...
+test $ sleep 15
+test > still running...
+test $ echo "Testing /ping endpoint..."
+test > Testing /ping endpoint...
+test $ curl -f http://localhost:8080/ping
+test >   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+test >                                  Dload  Upload   Total   Spent    Left  Speed
+100     4  100     4    0     0    418      0 --:--:-- --:--:-- --:--:--   444
+test > pong<gclShellPromptPlaceholder> echo "✅ /ping endpoint test passed"
+test > ✅ /ping endpoint test passed
+test $ echo "Cleaning up test container..."
+test > Cleaning up test container...
+test $ docker rm -f $CONTAINER_ID
+test > 42e89f869a08ab08ff0d0f6018c19551d2ba61a157fa553595bd6089c9de699c
+test $ echo "Test completed successfully"
+test > Test completed successfully
+test finished in 16 s
+
+ PASS  test
+✅ Стадия test завершена успешно
+
+3️⃣ Запуск стадии deploy...
+parsing and downloads finished in 142 ms.
+json schema validated in 533 ms
+deploy starting shell (deploy)
+deploy $ echo "Loading image into Minikube..."
+deploy > Loading image into Minikube...
+deploy $ minikube image load ${IMAGE_NAME}:${IMAGE_TAG}
+deploy > still running...
+deploy > still running...
+deploy > still running...
+deploy > still running...
+deploy > still running...
+deploy > still running...
+deploy > still running...
+deploy $ echo "Image loaded into Minikube successfully"
+deploy > Image loaded into Minikube successfully
+deploy $ echo "Deploying to Kubernetes using Helm..."
+deploy > Deploying to Kubernetes using Helm...
+deploy $ helm upgrade --install booking-service ${HELM_CHART_PATH} --set image.name=${IMAGE_NAME} --set image.tag=${IMAGE_TAG} --wait --timeout=300s
+deploy > Release "booking-service" does not exist. Installing it now.
+deploy > still running...
+deploy > NAME: booking-service
+deploy > LAST DEPLOYED: Fri Nov 28 07:24:20 2025
+deploy > NAMESPACE: default
+deploy > STATUS: deployed
+deploy > REVISION: 1
+deploy > DESCRIPTION: Install complete
+deploy > TEST SUITE: None
+deploy $ echo "Deployment completed successfully"
+deploy > Deployment completed successfully
+deploy $ echo "Checking deployment status..."
+deploy > Checking deployment status...
+deploy $ kubectl get deployment booking-service
+deploy > NAME              READY   UP-TO-DATE   AVAILABLE   AGE
+deploy > booking-service   1/1     1            1           15s
+deploy $ kubectl get service booking-service
+deploy > NAME              TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+deploy > booking-service   ClusterIP   10.96.58.222   <none>        80/TCP    15s
+deploy $ kubectl get pods -l app.kubernetes.io/name=booking-service
+deploy > No resources found in default namespace.
+deploy finished in 1.45 min
+
+ PASS  deploy
+✅ Стадия deploy завершена успешно
+
+4️⃣ Запуск стадии tag...
+Внимание: стадия tag настроена как manual, запуская принудительно...
+parsing and downloads finished in 139 ms.
+json schema validated in 434 ms
+tag starting shell (tag)
+tag $ echo "Creating Git tag..."
+tag > Creating Git tag...
+tag $ git config user.name "GitLab CI"
+tag $ git config user.email "ci@gitlab.com"
+tag $ git tag -a "deploy_$(date +%Y%m%d_%H%M%S)" -m "Deployment tag"
+tag $ echo "✅ Tag created successfully"
+tag > ✅ Tag created successfully
+tag finished in 65 ms
+
+ PASS  tag
+✅ Стадия tag завершена успешно
+
+🎉 Все стадии завершены успешно!
+
+Проверить развертывание можно следующими командами:
+kubectl get deployment booking-service
+kubectl get service booking-service
+kubectl get pods -l app=booking-service
+
+Для тестирования сервиса локально:
+kubectl port-forward svc/booking-service 8080:80
+curl http://localhost:8080/ping

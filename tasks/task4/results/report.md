@@ -79,4 +79,4 @@ curl localhost:8080/ping
 - **values-prod.yaml**: 3 реплики, ENABLE_FEATURE_X=false
 
 ### 4. Скрипты тестирования:
-- **test-pipeline.sh** и **test-pipeline.ps1** для автоматического запуска пайплайна
+- **test-pipeline.sh** для автоматического запуска пайплайна
