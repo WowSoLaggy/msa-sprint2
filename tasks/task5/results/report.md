@@ -122,3 +122,16 @@ kubectl -n istio-system port-forward svc/istio-ingressgateway 8080:80
      88 v1
      12 v2
 ```
+
+## Проверка feature flag
+
+Чтоб проверить работу фича-флага по хедеру:
+```sh
+./check-feature-flag.sh
+```
+
+Вывод будет:
+```sh
+▶️ Проверка Feature Flag (X-Feature-Enabled: true)...
+    100 v2
+```

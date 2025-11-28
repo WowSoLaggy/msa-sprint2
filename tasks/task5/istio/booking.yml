@@ -111,6 +111,14 @@ spec:
   gateways:
     - booking-gw
   http:
+  - match:
+    - headers:
+        x-feature-enabled:
+          exact: "true"
+    route:
+    - destination:
+        host: booking.default.svc.cluster.local
+        subset: v2
   - route:
     - destination:
         host: booking.default.svc.cluster.local
