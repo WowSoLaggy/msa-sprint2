@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Values.appName }}-vs
+spec:
+  hosts:
+    - {{ .Values.istio.host }}
+  gateways:
+    - {{ .Values.istio.gateway.name }}
+  http:
+    - route:
+        - destination:
+            host: {{ .Values.appName }}.default.svc.cluster.local
+            subset: v1
+          weight: {{ .Values.canary.v1Weight }}
+        - destination:
+            host: {{ .Values.appName }}.default.svc.cluster.local
+            subset: v2
+          weight: {{ .Values.canary.v2Weight }}

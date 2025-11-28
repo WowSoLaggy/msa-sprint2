@@ -1,0 +1,22 @@
+appName: booking
+images:
+  v1: booking-service:v1
+  v2: booking-service:v2
+replicaCount:
+  v1: 1
+  v2: 1
+service:
+  port: 9090
+  targetPort: 8080
+canary:
+  v1Weight: 100
+  v2Weight: 0
+featureFlag:
+  enabled: false
+istio:
+  host: booking.local
+  gateway:
+    name: booking-gw
+  ingressLabel:
+    key: istio
+    value: ingressgateway

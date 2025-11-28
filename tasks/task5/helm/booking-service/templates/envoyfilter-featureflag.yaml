@@ -1,0 +1,31 @@
+{{- if .Values.featureFlag.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: {{ .Values.appName }}-feature-flag
+spec:
+  workloadSelector:
+    labels:
+      {{ .Values.istio.ingressLabel.key }}: {{ .Values.istio.ingressLabel.value }}
+  configPatches:
+    - applyTo: ROUTE_CONFIGURATION
+      match:
+        context: GATEWAY
+        routeConfiguration:
+          name: http.80
+      patch:
+        operation: MERGE
+        value:
+          virtual_hosts:
+            - name: {{ .Values.istio.host }}
+              domains:
+                - {{ .Values.istio.host }}
+              routes:
+                - match:
+                    headers:
+                      - name: {{ .Values.featureFlag.headerName }}
+                        exact_match: {{ .Values.featureFlag.headerValue | quote }}
+                    prefix: "/"
+                  route:
+                    cluster: "outbound|{{ .Values.service.port }}|v2|{{ .Values.appName }}.default.svc.cluster.local"
+{{- end }}
