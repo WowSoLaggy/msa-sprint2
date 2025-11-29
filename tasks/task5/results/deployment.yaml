@@ -1,0 +1,25 @@
+# deployment.yaml (multi-version)
+{{- range $v := .Values.versions }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Values.app.name }}-{{ $v }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $.Values.app.name }}
+      version: {{ $v }}
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.app.name }}
+        version: {{ $v }}
+    spec:
+      containers:
+        - name: {{ $.Values.app.name }}
+          image: {{ $.Values.image.name }}:{{ $v }}
+          ports:
+            - containerPort: {{ $.Values.service.port }}
+---
+{{- end }}

@@ -1,0 +1,14 @@
+replicaCount: 2
+
+app:
+  name: booking
+
+image:
+  name: booking-service
+
+versions:
+  - v1
+  - v2
+
+service:
+  port: 8080
